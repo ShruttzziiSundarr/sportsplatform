@@ -1,19 +1,49 @@
 import { supabase } from '../config/supabase';
-// Note: Adjust the import path below if your schema file is directly in types instead of types/profile
-import { CreateProfileInput } from '../types/profile/schema'; 
+import { CreateProfileInput } from '../types/profile/schema';
 
-export const insertProfile = async (profileData: CreateProfileInput) => {
-  // We use the Supabase client to insert the validated data into the 'profiles' table
+export const insertProfile = async (
+  profileData: CreateProfileInput & { visibility_score?: number },
+) => {
   const { data, error } = await supabase
     .from('profiles')
     .insert([profileData])
     .select()
-    .single(); // .single() ensures we return an object, not an array
+    .single();
 
-  // If Supabase throws a database error, we catch it and throw it up the chain
-  if (error) {
-    throw new Error(error.message);
-  }
+  if (error) throw new Error(error.message);
+  return data;
+};
 
+export const updateScoutSummary = async (
+  profileId: string,
+  scoutSummary: string,
+  visibilityScore: number,
+): Promise<void> => {
+  const { error } = await supabase
+    .from('profiles')
+    .update({ scout_summary: scoutSummary, visibility_score: visibilityScore })
+    .eq('id', profileId);
+
+  if (error) throw new Error(error.message);
+};
+
+export const getProfiles = async () => {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .order('visibility_score', { ascending: false });
+
+  if (error) throw new Error(error.message);
+  return data;
+};
+
+export const getProfileById = async (profileId: string) => {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', profileId)
+    .single();
+
+  if (error) throw new Error(error.message);
   return data;
 };

@@ -3,6 +3,9 @@ import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
 
+// 1. Import our new profile routes
+import profileRoutes from './routes/profile.routes';
+
 dotenv.config();
 
 const app = express();
@@ -12,6 +15,9 @@ const PORT = process.env.PORT || 8000;
 app.use(helmet()); // Secures HTTP headers
 app.use(cors());
 app.use(express.json()); // Parses incoming JSON payloads
+
+// 2. Wire up the API endpoints
+app.use('/api/profiles', profileRoutes);
 
 // Health Check Route (Great for testing if the server is alive)
 app.get('/health', (req: Request, res: Response) => {
